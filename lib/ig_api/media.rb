@@ -1,7 +1,10 @@
 require 'ostruct'
+require 'digest/md5'
 
 module IgApi
   class Media
+    attr_reader :user, :api
+
     def self.get_id_from_code(code)
       alphabet = {
         '-': 62, '1': 53, '0': 52, '3': 55, '2': 54, '5': 57,
@@ -31,16 +34,41 @@ module IgApi
     end
 
     def create_like(media_id)
-      response = @api.post(Constants::URL + "media/#{media_id}/like/")
-          .with(ua: @user.useragent, session: @user.session)
-          .exec
+      response = JSON.parse api.post(Constants::URL + "media/#{media_id}/like/",
+                          format(
+                            'ig_sig_key_version=4&signed_body=%s',
+                            Http.generate_signature(
+                              media_id: media_id,
+                              _uid: user.data[:id],
+                              radio_type: "wifi-none",
+                              module_name: "feed_timeline",
+                              d: false
+                            )
+                          )).with(session: user.session, ua: user.useragent)
+                            .exec.body, object_class: OpenStruct
+      raise Exception, response['message'] if response['status'] == 'fail'
+      response
+    end
 
-      JSON.parse response.body, object_class: OpenStruct
+    def create_comment(media_id:, comment_text:)
+      response = JSON.parse api.post(Constants::URL + "media/#{media_id}/comment/",
+        format(
+          'ig_sig_key_version=4&signed_body=%s',
+          Http.generate_signature(
+            media_id: media_id,
+            src: 'profile',
+            comment_text: comment_text,
+            idempotence_token: Digest::MD5.hexdigest(comment_text)
+          )
+        )).with(session: user.session, ua: user.useragent)
+        .exec.body, object_class: OpenStruct
+      raise Exception, response['message'] if response['status'] == 'fail'
+      response
     end
 
     def like(media_id)
-      response = @api.get(Constants::URL + "media/#{media_id}/likers/")
-                     .with(ua: @user.useragent, session: @user.session)
+      response = api.get(Constants::URL + "media/#{media_id}/likers/")
+                     .with(ua: user.useragent, session: user.session)
                      .exec
 
       raise Exception, response['message'] if response['status'] == 'fail'
@@ -49,4 +77,3 @@ module IgApi
     end
   end
 end
-

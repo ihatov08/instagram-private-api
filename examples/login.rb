@@ -6,7 +6,6 @@ require 'pry'
 account = IgApi::Account.new
 
 user = account.login(*ARGV)
-binding.pry
 search = user.search_for_user 'instagram' #search
 
 news = user.news
