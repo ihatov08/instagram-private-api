@@ -35,6 +35,10 @@ module IgApi
       account.search_for_user(self, username)
     end
 
+    def following?(username)
+      account.following?(self, username)
+    end
+
     def info_by_name(username)
       response = @api.get(Constants::URL + "users/#{username}/usernameinfo/")
                      .with(ua: useragent, session: session)
@@ -79,6 +83,12 @@ module IgApi
       @thread = IgApi::Thread.new unless defined? @thread
 
       @thread.using self
+    end
+
+    def news
+      @news = IgApi::News.new unless defined? @news
+
+      @news.using self
     end
 
     def md5
