@@ -59,6 +59,11 @@ module IgApi
       return nil unless response.user.any?
     end
 
+    def following?(user, username)
+      searched_user = search_for_user(user, username)
+      searched_user.data.friendship_status.following
+    end
+
     def search_for_user(user, username)
       rank_token = IgApi::Http.generate_rank_token user.session.scan(/ds_user_id=([\d]+);/)[0][0]
       endpoint = 'https://i.instagram.com/api/v1/users/search/'
