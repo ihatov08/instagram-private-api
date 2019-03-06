@@ -2,9 +2,7 @@ require 'ostruct'
 
 module IgApi
   class Account
-    def initialized
-      @api = nil
-    end
+    attr_accessor :response
 
     def api
       @api = IgApi::Http.new if @api.nil?
@@ -13,7 +11,7 @@ module IgApi
     end
 
     def using(session)
-      User.new session: session
+      User.new(session: session)
     end
 
     def login(username, password, config = IgApi::Configuration.new)
@@ -32,11 +30,15 @@ module IgApi
         )
       ).with(ua: user.useragent).exec
 
-      response = JSON.parse request.body, object_class: OpenStruct
+      res = JSON.parse request.body, object_class: OpenStruct
 
-      raise response.message if response.status == 'fail'
+      if res.status == 'fail'
+        self.response = res
+        return false
+      end
 
-      logged_in_user = response.logged_in_user
+
+      logged_in_user = res.logged_in_user
       user.data = logged_in_user
 
       cookies_array = []
