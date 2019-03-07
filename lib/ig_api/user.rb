@@ -91,6 +91,10 @@ module IgApi
       @news.using self
     end
 
+    def media
+      @media ||= IgApi::Media.new(self)
+    end
+
     def md5
       Digest::MD5.hexdigest @username
     end
