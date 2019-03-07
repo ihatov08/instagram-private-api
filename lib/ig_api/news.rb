@@ -32,7 +32,20 @@ module IgApi
     def started_following_you_users
       inbox["old_stories"]
         .select{|s| s["type"] == TYPES[:follow] }
-        .map{|m| m["args"]["inline_follow"]["user_info"] }
+        .map{|m| m["args"]["inline_follow"] }
+    end
+
+    def to_be_follow_back_users
+      started_following_you_users
+        .select{|s| s["following"] == false }
+        .map do |m|
+          user_info = m["user_info"]
+          OpenStruct.new(
+            id: user_info["id"],
+            username: user_info["username"],
+            profile_pic_url: user_info["profile_pic_url"]
+          )
+      end
     end
   end
 end
