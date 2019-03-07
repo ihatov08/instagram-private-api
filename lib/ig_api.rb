@@ -8,6 +8,7 @@ require 'ig_api/thread'
 require 'ig_api/constants'
 require 'ig_api/relationship'
 require 'ig_api/media'
+require 'ig_api/news'
 
 # Root module
 module IgApi
