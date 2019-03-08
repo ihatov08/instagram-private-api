@@ -46,7 +46,6 @@ module IgApi
                             )
                           )).with(session: user.session, ua: user.useragent)
                             .exec.body, object_class: OpenStruct
-      raise Exception, response['message'] if response['status'] == 'fail'
       response
     end
 
@@ -62,7 +61,6 @@ module IgApi
           )
         )).with(session: user.session, ua: user.useragent)
         .exec.body, object_class: OpenStruct
-      raise Exception, response['message'] if response['status'] == 'fail'
       response
     end
 
@@ -70,8 +68,6 @@ module IgApi
       response = api.get(Constants::URL + "media/#{media_id}/likers/")
                      .with(ua: user.useragent, session: user.session)
                      .exec
-
-      raise Exception, response['message'] if response['status'] == 'fail'
 
       JSON.parse response.body, object_class: OpenStruct
     end
